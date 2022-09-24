@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 
-const useContextMenu = () => {
+const useContextMenu = (callback) => {
     const [loc, setLoc] = useState({x: 0, y: 0});
     const [showContextMenu, setShowContextMenu] = useState(false);
 
     const handleContextMenu = useCallback((e) => {
         e.preventDefault();        
-        console.log(e);
+        // console.log(e);
         setLoc({x: e.clientX, y: e.clientY});
+        callback(e.target);
         setShowContextMenu(true);
     }, [loc]);
 

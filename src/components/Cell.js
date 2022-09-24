@@ -7,6 +7,10 @@ const Cell = ({cellIndex, headerCell, isActive, isSelected, value}) => {
 
     const updateCellValue = (e) => setCellValue(e.target.value);
 
+    const handleColumnSorting = (e) => {
+        console.log('');
+    }
+
     if(isActive){
         cellStyles.borderColor = 'blue';
     }
@@ -21,6 +25,7 @@ const Cell = ({cellIndex, headerCell, isActive, isSelected, value}) => {
                 ? value
                 : <input ref={ipRef} type="text" value={cellValue} onChange={updateCellValue} disabled={!isActive}/>
             }
+            {/* <button classname="sort-column-btn" onClick={handleColumnSorting}></button> */}
         </div>
     );
 }
