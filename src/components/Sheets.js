@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Cell from "./Cell";
 import CellContextMenu from "./CellContextMenu";
 import Row from "./Row";
@@ -33,27 +33,29 @@ const ContextMenuOptions = {
 const Sheets = ({rowsCount, colsCount}) => {
     const [rows, setRows] = useState(rowsCount);
     const [cols, setCols] = useState(colsCount);
-    const [activeCell, setActiveCell] = useState({row: -1, col: -1});
-    const [rowsList, setRowsList] = useState([]);
+    const [activeCell, setActiveCell] = useState({row: 0, col: 0});
     const [contextMenuList, setContextMenuList] = useState([]);
-    
-    
+
+    let SheetData = useRef([]);
     
     useEffect(() => {
-        let arr = [...Array(rows)].map((_, rowI) => (
-            <Row index={rowI+1} key={rowI+1}>
-                {[...Array(cols)].map((_, colI) => (
-                    <Cell 
-                        key={colI+1}
-                        cellIndex={colI+1}
-                        value=""
-                        isActive={(activeCell.row === rowI+1 && activeCell.col === colI+1)}
-                    />
-                ))}
-            </Row>
-        ));
+        ContextMenuOptions.rowAbove.onSelect = (targetCell) => {
+            const r = targetCell.row;
+            const c = targetCell.col;
+            console.log(SheetData.current);
+            
+            const newRow = Array(cols).fill('0');
+            SheetData.current.splice(r, 0, newRow);
+            console.log(r, c, SheetData.current);
+            
+            setRows(rows+1);
+            // setActiveCell({row: r, col: c});
+        }
 
-        setRowsList(arr);
+        SheetData.current = [...Array(rows)].map((_, i) => Array(cols).fill(''));
+        console.log(SheetData.current);
+
+        setContextMenuList([]);
     }, []);
 
     const getColumnName = (i) => String.fromCharCode(parseInt(i)+64);
@@ -75,11 +77,17 @@ const Sheets = ({rowsCount, colsCount}) => {
     const createContextMenuList = (targetEle) => {
        let cell = targetEle.closest('.cell');
        if(!!cell){
-            let cellRowIndex = cell.parentElement.dataset.rowIndex;
-            let cellColIndex = cell.dataset.cellIndex;
-            let newMenuList = [];
+            _activateCell(cell);
+       }
+    }
 
-            if(cellRowIndex === '-1'){
+    useEffect(() => {
+        let cellRowIndex = activeCell.row;
+        let cellColIndex = activeCell.col;
+        let newMenuList = [];
+
+        if(!(cellRowIndex === 0 && cellColIndex === 0)){
+            if(cellRowIndex === 0){
                 newMenuList.push(ContextMenuOptions.sortAZ);
                 newMenuList.push(ContextMenuOptions.sortZA);
             } else{
@@ -87,21 +95,25 @@ const Sheets = ({rowsCount, colsCount}) => {
                 newMenuList.push(ContextMenuOptions.rowBelow);
             }
             
-            if(cellColIndex !== '-1'){
+            if(cellColIndex !== 0){
                 newMenuList.push(ContextMenuOptions.colLeft);
                 newMenuList.push(ContextMenuOptions.colRight);
             }
 
-            _activateCell(cell);
             setContextMenuList(newMenuList);
-       }
+        }
+    }, [activeCell]);
+
+    const updateSheetData = (newValue) => {
+        console.log(SheetData, activeCell, newValue);
+        SheetData.current[activeCell.row][activeCell.col] = newValue;
     }
 
     return(
         <div className="sheet-wrapper" onClick={handleClick}>
-            <CellContextMenu createMenuList={createContextMenuList} menuList={contextMenuList} />
+            <CellContextMenu createMenuList={createContextMenuList} menuList={contextMenuList} activeCell={activeCell} />
 
-            <Row key={0} headerRow={true} index={-1}>
+            <Row key={0} headerRow={true} index={0}>
             {
                 [...Array(cols)].map((_, i) => (
                     <Cell 
@@ -116,19 +128,19 @@ const Sheets = ({rowsCount, colsCount}) => {
             </Row>
 
             {
-                rowsList
-                // [...Array(rows)].map((_, rowI) => (
-                //     <Row index={rowI+1} key={rowI+1}>
-                //         {[...Array(cols)].map((_, colI) => (
-                //             <Cell 
-                //                 key={colI+1}
-                //                 cellIndex={colI+1}
-                //                 value=""
-                //                 isActive={(activeCell.row === rowI+1 && activeCell.col === colI+1)}
-                //             />
-                //         ))}
-                //     </Row>
-                // ))
+                [...Array(rows)].map((_, rowI) => (
+                    <Row index={rowI+1} key={rowI+1}>
+                        {[...Array(cols)].map((_, colI) => (
+                            <Cell 
+                                key={colI+1}
+                                cellIndex={colI+1}
+                                value={SheetData.length > 0 ? SheetData.current[rowI][colI] : ''}
+                                isActive={(activeCell.row === rowI+1 && activeCell.col === colI+1)}
+                                updateSheetData={updateSheetData}
+                            />
+                        ))}
+                    </Row>
+                ))
             }
         </div>
     );

@@ -1,11 +1,14 @@
 import { useRef, useState } from "react";
 
-const Cell = ({cellIndex, headerCell, isActive, isSelected, value}) => {
+const Cell = ({cellIndex, headerCell, isActive, isSelected, updateSheetData, value}) => {
     const [cellValue, setCellValue] = useState(value);
     const cellStyles = {};
     const ipRef = useRef(null);
 
-    const updateCellValue = (e) => setCellValue(e.target.value);
+    const updateCellValue = (e) => {
+        setCellValue(e.target.value)
+        updateSheetData(e.target.value);
+    };
 
     const handleColumnSorting = (e) => {
         console.log('');

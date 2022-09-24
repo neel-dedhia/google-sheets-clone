@@ -1,9 +1,9 @@
 import useContextMenu from '../hooks/useContextMenu';
 
-const CellContextMenu = ({createMenuList, menuList}) => {
+const CellContextMenu = ({activeCell, createMenuList, menuList}) => {
     const {loc, showContextMenu} = useContextMenu(createMenuList);
 
-    if(!showContextMenu) return (<></>);
+    if(!showContextMenu || menuList.length === 0) return (<></>);
     return (
         <ul 
             className="context-menu-list"
@@ -15,7 +15,7 @@ const CellContextMenu = ({createMenuList, menuList}) => {
         {
             menuList.map((item, i) => (
                 <li key={i} className="context-menu-item">
-                    <button type="button" className="context-menu-option"  onClick={item.onSelect}>{item.name}</button>
+                    <button type="button" className="context-menu-option"  onClick={() => item.onSelect(activeCell)}>{item.name}</button>
                 </li>
             ))
         }
