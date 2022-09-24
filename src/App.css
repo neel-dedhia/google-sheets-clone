@@ -1,0 +1,13 @@
+input{
+    appearance: none;-webkit-appearance: none;-ms-appearance: none;outline: none;border: none;
+    font: inherit;border-radius: 0;width: 100%;padding: 0;
+}
+
+body{font-size: 16px;font-family: 'Roboto';}
+
+.sheet-wrapper{display: flex;flex-direction: column;}
+.row{display: flex;flex-direction: row;}
+.cell{width: 100px;height: 20px;line-height: 20px;padding: 2px;color: #000;border: 1px solid #c7c7c7;}
+.header-cell{text-align: center;background: #e8eaed;color: #626262;}
+
+.cell-context-menu{position: absolute; background: #fff; padding: 15px;border: 1px solid #c7c7c7;}

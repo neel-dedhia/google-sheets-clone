@@ -1,10 +1,13 @@
-import logo from './logo.svg';
+// import logo from './logo.svg';
 import './App.css';
+import Sheets from './components/Sheets';
 
 function App() {
+  document.addEventListener("contextmenu", (e) => e.preventDefault());
+
   return (
     <div className="App">
-      <h1 style={{textAlign: 'center'}}>Google Sheets Clone</h1>
+      <Sheets rowsCount={10} colsCount={10} />
     </div>
   );
 }
