@@ -1,6 +1,6 @@
 // import logo from './logo.svg';
 import './App.css';
-import Sheets from './components/Sheets';
+import Sheets from './components/SheetsV2';
 
 function App() {
   document.addEventListener("contextmenu", (e) => e.preventDefault());

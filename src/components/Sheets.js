@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Cell from "./Cell";
 import CellContextMenu from "./CellContextMenu";
 import Row from "./Row";
@@ -35,28 +35,34 @@ const Sheets = ({rowsCount, colsCount}) => {
     const [cols, setCols] = useState(colsCount);
     const [activeCell, setActiveCell] = useState({row: 0, col: 0});
     const [contextMenuList, setContextMenuList] = useState([]);
+    const [SheetData, setSheetData] = useState([]);
 
-    let SheetData = useRef([]);
+    ContextMenuOptions.rowAbove.onSelect = useCallback(((targetCell) => {
+        const r = activeCell.row;
+        const c = activeCell.col;
+        const newSheetData = JSON.parse(JSON.stringify(SheetData));
+        console.log('Before Update', JSON.parse(JSON.stringify(newSheetData)));
+        
+        const newRow = Array(cols).fill('0');
+        newSheetData.splice(r, 0, newRow);
+        console.log(r, c, newSheetData);
+        
+        setSheetData([...newSheetData]);
+        // setActiveCell({row: r, col: c});
+    }), [activeCell, SheetData]);
     
     useEffect(() => {
-        ContextMenuOptions.rowAbove.onSelect = (targetCell) => {
-            const r = targetCell.row;
-            const c = targetCell.col;
-            console.log(SheetData.current);
-            
-            const newRow = Array(cols).fill('0');
-            SheetData.current.splice(r, 0, newRow);
-            console.log(r, c, SheetData.current);
-            
-            setRows(rows+1);
-            // setActiveCell({row: r, col: c});
-        }
-
-        SheetData.current = [...Array(rows)].map((_, i) => Array(cols).fill(''));
-        console.log(SheetData.current);
-
+        setSheetData([...Array(rows)].map((_, i) => Array(cols).fill('')));
         setContextMenuList([]);
     }, []);
+
+    useEffect(() => {
+        if(SheetData.length > 0){
+            // console.log(SheetData.length);
+            if(rows !== SheetData.length) setRows(SheetData.length);
+            if(cols !== SheetData[0].length) setCols(SheetData[0].length);
+        }
+    }, [SheetData]);
 
     const getColumnName = (i) => String.fromCharCode(parseInt(i)+64);
 
@@ -106,7 +112,7 @@ const Sheets = ({rowsCount, colsCount}) => {
 
     const updateSheetData = (newValue) => {
         console.log(SheetData, activeCell, newValue);
-        SheetData.current[activeCell.row][activeCell.col] = newValue;
+        SheetData[activeCell.row][activeCell.col] = newValue;
     }
 
     return(
@@ -134,7 +140,7 @@ const Sheets = ({rowsCount, colsCount}) => {
                             <Cell 
                                 key={colI+1}
                                 cellIndex={colI+1}
-                                value={SheetData.length > 0 ? SheetData.current[rowI][colI] : ''}
+                                value={SheetData.length > 0 ? SheetData[rowI][colI] : ''}
                                 isActive={(activeCell.row === rowI+1 && activeCell.col === colI+1)}
                                 updateSheetData={updateSheetData}
                             />

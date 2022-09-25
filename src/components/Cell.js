@@ -1,9 +1,10 @@
-import { useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 const Cell = ({cellIndex, headerCell, isActive, isSelected, updateSheetData, value}) => {
     const [cellValue, setCellValue] = useState(value);
-    const cellStyles = {};
-    const ipRef = useRef(null);
+    const cellStyles = {};    
+
+    useEffect(() => setCellValue(value), [value]);
 
     const updateCellValue = (e) => {
         setCellValue(e.target.value)
@@ -26,7 +27,7 @@ const Cell = ({cellIndex, headerCell, isActive, isSelected, updateSheetData, val
         <div className={`cell${!!headerCell ? ' header-cell' : ''}`} data-cell-index={cellIndex} style={cellStyles}>
             { headerCell
                 ? value
-                : <input ref={ipRef} type="text" value={cellValue} onChange={updateCellValue} disabled={!isActive}/>
+                : <input type="text" value={cellValue} onChange={updateCellValue} disabled={!isActive}/>
             }
             {/* <button classname="sort-column-btn" onClick={handleColumnSorting}></button> */}
         </div>
