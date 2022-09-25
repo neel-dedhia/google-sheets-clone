@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { useEffect, useReducer } from "react";
 import SheetInitialState from "../SheetInitialState";
 import Cell from "./Cell";
 import CellContextMenu from "./CellContextMenu";
@@ -108,8 +108,7 @@ const Sheets = ({rowsCount, colsCount}) => {
     const [state, dispatch] = useReducer(SheetReducer, SheetInitialState);
 
     const activeCell = state.activeCell;
-    const sheetData = state.sheetData;
-    const contextMenuList = state.contextMenuList;
+    const sheetData = state.sheetData;    
 
     const addRowAbove = () => {
         dispatch({type: 'AddRow', row: activeCell.row, col: activeCell.col});
@@ -136,7 +135,7 @@ const Sheets = ({rowsCount, colsCount}) => {
     };
     
     useEffect(() => {        
-        dispatch({type: 'InitializeSheetData', data: [...Array(rowsCount)].map((_, i) => Array(colsCount).fill(''))});
+        dispatch({type: 'InitializeSheetData', data: [...Array(rowsCount)].map((_, i) => Array(colsCount).fill(i))});
     }, []);
 
     const getColumnName = (i) => String.fromCharCode(parseInt(i)+64);
@@ -193,12 +192,32 @@ const Sheets = ({rowsCount, colsCount}) => {
         }
     }, [activeCell]);
 
-    const updateSheetData = (newValue) => dispatch({
+    const updateCellInSheetData = (newValue) => dispatch({
         type: 'UpdateCellValue', 
         row: activeCell.row, 
         col: activeCell.col, 
         value: newValue
     });
+
+    const getDataFromCellRange = (startIndex, endIndex) => {
+        let cellData = [];
+        let charNumsRe = /\D+|\d+/g;
+        let [sR, sC] = startIndex.match(charNumsRe);
+        let [eR, eC] = endIndex.match(charNumsRe);
+        [sR, eR] = [sR.charCodeAt(0) - 64, eR.charCodeAt(0) - 64];
+        [sC, eC] = [parseInt(sC), parseInt(eC)];
+
+        // console.log([sR, sC], [eR, eC]);
+
+        for(let i = sR; i <= eR; i++){
+            for(let j = sC; j <= eC; j++){
+                // console.log(i, j, sheetData[j][i]);
+                cellData.push(sheetData[j][i]);
+            }
+        }
+
+        return cellData;
+    }
 
     const RowsBuilder = (r, rI) => {
         const headerRowProps = (rI === 0) ? {headerRow: true} : {};        
@@ -209,16 +228,17 @@ const Sheets = ({rowsCount, colsCount}) => {
                     sheetData[rI].map((cValue, cI) => {
                         let cellProps = {};
                         if(rI === 0 && cI === 0){
-                            cellProps = {headerCell: true, value: ''}
+                            cellProps = {headerCell: true, sheetValue: ''}
                         } else if(rI === 0){
-                            cellProps = {headerCell: true, value: getColumnName(cI)}
+                            cellProps = {headerCell: true, sheetValue: getColumnName(cI)}
                         } else if(cI === 0){
-                            cellProps = {headerCell: true, value: rI}
+                            cellProps = {headerCell: true, sheetValue: rI}
                         } else{
                             cellProps = {
-                                value: sheetData[rI][cI], 
+                                sheetValue: sheetData[rI][cI], 
                                 isActive: (activeCell.row === rI && activeCell.col === cI),
-                                updateSheetData: updateSheetData,
+                                updateCellInSheetData: updateCellInSheetData,
+                                getDataFromCellRange: getDataFromCellRange
                             }
                         }
 
