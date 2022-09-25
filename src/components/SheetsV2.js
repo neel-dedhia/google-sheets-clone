@@ -135,7 +135,7 @@ const Sheets = ({rowsCount, colsCount}) => {
     };
     
     useEffect(() => {        
-        dispatch({type: 'InitializeSheetData', data: [...Array(rowsCount)].map((_, i) => Array(colsCount).fill(i))});
+        dispatch({type: 'InitializeSheetData', data: [...Array(rowsCount)].map((_, i) => Array(colsCount).fill(''))});
     }, []);
 
     const getColumnName = (i) => String.fromCharCode(parseInt(i)+64);
@@ -202,19 +202,36 @@ const Sheets = ({rowsCount, colsCount}) => {
     const getDataFromCellRange = (startIndex, endIndex) => {
         let cellData = [];
         let charNumsRe = /\D+|\d+/g;
-        let [sR, sC] = startIndex.match(charNumsRe);
-        let [eR, eC] = endIndex.match(charNumsRe);
-        [sR, eR] = [sR.charCodeAt(0) - 64, eR.charCodeAt(0) - 64];
-        [sC, eC] = [parseInt(sC), parseInt(eC)];
+        let [sC, sR] = startIndex.match(charNumsRe);
+        let [eC, eR] = endIndex.match(charNumsRe);
+        
+        [sC, eC] = [sC.charCodeAt(0) - 64, eC.charCodeAt(0) - 64];
+        [sR, eR] = [parseInt(sR), parseInt(eR)];
 
-        // console.log([sR, sC], [eR, eC]);
+        let [rowIterator, colIterator] = [Math.abs(sR - eR)+1, Math.abs(sC - eC)+1];
+        
+        // console.group();
+        // console.log(startIndex.match(charNumsRe), endIndex.match(charNumsRe));
 
-        for(let i = sR; i <= eR; i++){
-            for(let j = sC; j <= eC; j++){
-                // console.log(i, j, sheetData[j][i]);
-                cellData.push(sheetData[j][i]);
+        // console.log('rc-is', [sR, sC], [eR, eC]);
+        
+        while(!!rowIterator){
+            let cI = colIterator;
+            let [startCol, endCol] = [sC, eC];
+            while(!!cI){
+                // console.log('in-loop: ', sR, startCol, sheetData[sR][startCol]);
+                cellData.push(sheetData[sR][startCol]);
+                startCol += (startCol <= endCol) ? 1 : -1;
+                cI--;
             }
+            
+            sR += (sR <= eR) ? 1 : -1;
+            rowIterator--;
         }
+
+        // console.log('res: ', cellData);
+
+        // console.groupEnd();
 
         return cellData;
     }
@@ -251,8 +268,23 @@ const Sheets = ({rowsCount, colsCount}) => {
         )
     }
 
+    const handleKeyUp = (e) => {
+        if(e.key === 'Enter' || e.keyCode === 13){
+            if(activeCell.row !== sheetData.length-1){
+                dispatch({type: 'ActivateCell', row: activeCell.row+1, col: activeCell.col});
+            }
+        } 
+        // else{
+            // Experiment keypress focus input and start editing
+            // console.log(e.key);
+            // document
+            //     .querySelector(`.row[data-row-index='${activeCell.row}'] .cell[data-cell-index='${activeCell.col}'] input`)
+            //     .focus();
+        // }
+    }
+
     return(
-        <div className="sheet-wrapper" onClick={handleClick}>
+        <div className="sheet-wrapper" onClick={handleClick} onKeyUp={handleKeyUp}>
             <CellContextMenu createMenuList={createContextMenuList} menuList={state.contextMenuList} />
 
             {

@@ -39,7 +39,11 @@ const Cell = ({cellIndex, getDataFromCellRange, headerCell, isActive, isSelected
         switch(expKW){
             case 'SUM': 
                 let valuesArr = getDataFromCellRange(startIndex, endIndex);
-                let sum = valuesArr.reduce((sum ,i) => sum+i);
+                let sum = 0;
+                for(let i=0; i<valuesArr.length; i++){
+                   if(isExpression(valuesArr[i])) return '#Error';
+                   sum += valuesArr[i];
+                }
                 return sum;
             default:
                 console.log(expKW, startIndex, endIndex);
