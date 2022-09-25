@@ -12,7 +12,7 @@
 - [x] Insert Column to Left/Right of selected Column.
 - [x] Sort Sheet with selected Column Z to A / A to Z
 - [x] Add values from range of cells using SUM Formula.
-- [ ] Forumula support - Subtraction & Multiplication.
+- [ ] Formula support - Subtraction & Multiplication.
 - [ ] Merging two or more cells.
 - [ ] Show count of selected columns.
 
