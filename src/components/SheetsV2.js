@@ -33,6 +33,7 @@ const ContextMenuOptions= {
 
 const SheetReducer = (state, action) => {
     // console.log('Action', action);
+    let copySheetData = [];
     switch(action.type){
         case 'InitializeSheetData':
             return {
@@ -59,13 +60,22 @@ const SheetReducer = (state, action) => {
                 contextMenuList: action.menuList
             };
         case 'AddRow':            
-            let copySheetData = JSON.parse(JSON.stringify(state.sheetData));
+            copySheetData = JSON.parse(JSON.stringify(state.sheetData));
             copySheetData.splice(action.row, 0, Array(state.totalCols).fill(''));
 
             return {
                 ...state,
                 sheetData: copySheetData,
                 totalRows: state.totalRows + 1
+            };
+        case 'AddCol':
+            copySheetData = JSON.parse(JSON.stringify(state.sheetData));
+            copySheetData.forEach((row) => row.splice(action.col, 0, ''));
+
+            return {
+                ...state,
+                sheetData: copySheetData,
+                totalCols: state.totalCols + 1
             };
         default: 
             console.log('default', action, state);
@@ -86,7 +96,15 @@ const Sheets = ({rowsCount, colsCount}) => {
     
     const addRowBelow = () => {
         dispatch({type: 'AddRow', row: activeCell.row+1, col: activeCell.col});
-    }
+    };
+
+    const addColLeft = () => {
+        dispatch({type: 'AddCol', row: activeCell.row, col: activeCell.col});
+    };
+
+    const addColRight = () => {
+        dispatch({type: 'AddCol', row: activeCell.row, col: activeCell.col+1});
+    };
     
     
     useEffect(() => {        
@@ -133,7 +151,10 @@ const Sheets = ({rowsCount, colsCount}) => {
             }
             
             if(cellColIndex !== 0){
+                ContextMenuOptions.colLeft.onSelect = addColLeft;
                 newMenuList.push(ContextMenuOptions.colLeft);
+
+                ContextMenuOptions.colRight.onSelect = addColRight;
                 newMenuList.push(ContextMenuOptions.colRight);
             }
             
