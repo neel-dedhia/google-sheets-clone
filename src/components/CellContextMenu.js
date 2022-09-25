@@ -1,9 +1,13 @@
 import useContextMenu from '../hooks/useContextMenu';
 
+/**
+ * Component: CellContextMenu
+ */
 const CellContextMenu = ({activeCell, createMenuList, menuList}) => {
     const {loc, showContextMenu} = useContextMenu(createMenuList);
 
     if(!showContextMenu || menuList.length === 0) return (<></>);
+    
     return (
         <ul 
             className="context-menu-list"

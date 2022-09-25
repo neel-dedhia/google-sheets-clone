@@ -1,20 +1,19 @@
 import { useEffect, useState } from "react";
 
+/**
+ * Component: Cell
+ * State: cellValue,
+ * useEffects: sheetValue(propUpdate), cellValue(stateUpdate)
+*/
 const Cell = ({cellIndex, getDataFromCellRange, headerCell, isActive, isSelected, updateCellInSheetData, sheetValue}) => {
+    /*======= State ======= */
     const [cellValue, setCellValue] = useState(sheetValue);
+
+    /*======= Variables ======= */
     const cellStyles = {};
-
-    useEffect(() => {        
-        setCellValue(parseValue(sheetValue));
-    }, [sheetValue]);
-
-    useEffect(() => {
-        let valueParsed = parseValue(cellValue);
-        if(cellValue != valueParsed){
-            setCellValue(valueParsed)
-        }    
-    }, [cellValue]);
-
+    
+    /*======= Methods ======= */
+    // Parses Value into Expression result if detected
     const parseValue = (str) => {
         if(typeof str === 'string' && str.charAt(0) === '=') {
             let expression = isExpression(str);
@@ -27,14 +26,11 @@ const Cell = ({cellIndex, getDataFromCellRange, headerCell, isActive, isSelected
         return str;
     }
 
-    const updateCellValue = (e) => {
-        setCellValue(e.target.value);
-        updateCellInSheetData(e.target.value);
-    };
-
     // Returns matches array otherwise null
     const isExpression = (str) => (/^=([A-Z]*)[(]([A-Z]\d):([A-Z]\d)[)]/g.exec(str));
 
+    // Evaluate Expression and return result otherwise #Error if any value or expKW is invalid
+    // TODO(usecase): Subtraction, Multiplication
     const evaluateExpression = ([_, expKW, startIndex, endIndex]) => {
         switch(expKW){
             case 'SUM': 
@@ -51,19 +47,33 @@ const Cell = ({cellIndex, getDataFromCellRange, headerCell, isActive, isSelected
         }
     }
 
-    if(isActive){
-        cellStyles.borderColor = 'blue';
-    }
+    /*======= UseEffect (LifeCycle Methods) ======= */
+    useEffect(() => {        
+        setCellValue(parseValue(sheetValue));
+    }, [sheetValue]);
 
-    if(isSelected){
-        cellStyles.borderStyle = 'dashed';
-    }
+    useEffect(() => {
+        let valueParsed = parseValue(cellValue);
+        if(cellValue !== valueParsed){
+            setCellValue(valueParsed)
+        }    
+    }, [cellValue]);
+
+    /*======= Handler Methods ======= */
+    const handleChange = (e) => {
+        setCellValue(e.target.value);
+        updateCellInSheetData(e.target.value);
+    };
+
+    // Apply Styles based on Cell State
+    if(isActive){ cellStyles.borderColor = 'blue';}
+    if(isSelected){cellStyles.borderStyle = 'dashed';}
 
     return (
         <div className={`cell${!!headerCell ? ' header-cell' : ''}`} data-cell-index={cellIndex} style={cellStyles}>
             { headerCell
                 ? sheetValue
-                : <input type="text" value={cellValue} onChange={updateCellValue} disabled={!isActive}/>
+                : <input type="text" value={cellValue} onChange={handleChange} disabled={!isActive}/>
             }
         </div>
     );

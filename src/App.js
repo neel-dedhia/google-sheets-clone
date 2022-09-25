@@ -1,4 +1,3 @@
-// import logo from './logo.svg';
 import './App.css';
 import Sheets from './components/SheetsV2';
 
@@ -7,7 +6,7 @@ function App() {
 
   return (
     <div className="App">
-      <Sheets rowsCount={10} colsCount={10} />
+      <Sheets rowsCount={20} colsCount={20} />
     </div>
   );
 }
