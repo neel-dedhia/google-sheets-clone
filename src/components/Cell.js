@@ -38,6 +38,9 @@ const Cell = ({cellIndex, getDataFromCellRange, headerCell, isActive, isSelected
                 let sum = 0;
                 for(let i=0; i<valuesArr.length; i++){
                    if(isExpression(valuesArr[i])) return '#Error';
+                   
+                   //thou string a truly number is therefore worthy and shall be parsed to Integer!
+                   if(!isNaN(valuesArr[i])){ valuesArr[i] = parseInt(valuesArr[i]);}
                    sum += valuesArr[i];
                 }
                 return sum;
