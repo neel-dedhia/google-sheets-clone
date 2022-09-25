@@ -11,10 +11,6 @@ const Cell = ({cellIndex, headerCell, isActive, isSelected, updateSheetData, val
         updateSheetData(e.target.value);
     };
 
-    const handleColumnSorting = (e) => {
-        console.log('');
-    }
-
     if(isActive){
         cellStyles.borderColor = 'blue';
     }
@@ -29,7 +25,6 @@ const Cell = ({cellIndex, headerCell, isActive, isSelected, updateSheetData, val
                 ? value
                 : <input type="text" value={cellValue} onChange={updateCellValue} disabled={!isActive}/>
             }
-            {/* <button classname="sort-column-btn" onClick={handleColumnSorting}></button> */}
         </div>
     );
 }

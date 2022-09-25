@@ -12,7 +12,8 @@ body{font-size: 16px;font-family: 'Roboto';}
 .sheet-wrapper{display: flex;flex-direction: column;}
 .row{display: flex;flex-direction: row;}
 .cell{width: 100px;height: 20px;line-height: 20px;padding: 2px;color: #000;border: 1px solid #c7c7c7;}
-.header-cell{text-align: center;background: #e8eaed;color: #626262;}
+.header-cell{position: relative;text-align: center;background: #e8eaed;color: #626262;}
+.header-cell:hover{background: #c7cbd1}
 
 .context-menu-list{list-style: none;padding: 0;position: absolute; background: #fff; border: 1px solid #c7c7c7;}
 .context-menu-item{padding: 0 5px;}

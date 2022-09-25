@@ -3,33 +3,8 @@ import SheetInitialState from "../SheetInitialState";
 import Cell from "./Cell";
 import CellContextMenu from "./CellContextMenu";
 import Row from "./Row";
+import ContextMenuOptions from '../ContextMenuOptions';
 
-const ContextMenuOptions= {
-    sortAZ: {
-        name: 'Sort A to Z',
-        onSelect: () => {console.log('sort a to z');}
-    },
-    sortZA: {
-        name: 'Sort Z to A',
-        onSelect: () => {console.log('sort z to a');}
-    },
-    colLeft: {
-        name: 'Add column to Left',
-        onSelect: () => {console.log('add col left');}
-    },
-    colRight: {
-        name: 'Add column to Right',
-        onSelect: () => {console.log('add col right');}
-    },
-    rowAbove: {
-        name: 'Add row to Above',
-        onSelect: () => {console.log('add row above');}
-    },
-    rowBelow: {
-        name: 'Add row to Below',
-        onSelect: () => {console.log('add row below');}
-    },
-};
 
 const SheetReducer = (state, action) => {
     // console.log('Action', action);
@@ -52,7 +27,6 @@ const SheetReducer = (state, action) => {
             };
         case 'UpdateCellValue':
             state.sheetData[action.row][action.col] = action.value;
-            console.log(state);
             return state;
         case 'CreateMenuList':
             return {
@@ -76,6 +50,53 @@ const SheetReducer = (state, action) => {
                 ...state,
                 sheetData: copySheetData,
                 totalCols: state.totalCols + 1
+            };
+        case 'SortColumn':
+            copySheetData = [];
+            // filter rows having value in atleast 1 column
+            for(let rI=1; rI<state.sheetData.length; rI++){
+                state.sheetData[rI].some(v => (v !== '')) && copySheetData.push(state.sheetData[rI]);
+            }
+            
+            // Sort filtered rows
+            copySheetData.sort((a,b) => {
+                let aVal = a[action.col];
+                let bVal = b[action.col];
+
+                //though string a truly number is therefore worthy and shall be parsed to Integer!
+                if(!isNaN(aVal)){
+                    aVal = parseInt(aVal);
+                }
+                
+                if(!isNaN(bVal)){
+                    bVal = parseInt(bVal);
+                }
+
+                if(aVal === bVal) return 0;
+
+                switch(action.sortType){
+                    case 'ASC':
+                        return (aVal < bVal) ? -1 : 1;
+                    case 'DESC':
+                        return (aVal > bVal) ? -1 : 1;
+                    default: 
+                        return 0;
+                }
+            });
+
+            // Add remaing empty rows from sheetData into sorted Sheet
+            let extraRowslength = state.sheetData.length - copySheetData.length - 1;
+            let emptyCells = Array(state.totalCols).fill('');   //add header column array
+            copySheetData.splice(0, 0, [...emptyCells]);
+            
+            while(!!extraRowslength--){
+                copySheetData.push([...emptyCells]);                
+            }
+            // console.log(copySheetData);
+
+            return {
+                ...state,
+                sheetData: copySheetData
             };
         default: 
             console.log('default', action, state);
@@ -105,7 +126,14 @@ const Sheets = ({rowsCount, colsCount}) => {
     const addColRight = () => {
         dispatch({type: 'AddCol', row: activeCell.row, col: activeCell.col+1});
     };
-    
+
+    const colSortAZ = () => {
+        dispatch({type: 'SortColumn', sortType: 'ASC', row:activeCell.row, col: activeCell.col})
+    };
+
+    const colSortZA = () => {
+        dispatch({type: 'SortColumn', sortType: 'DESC', row:activeCell.row, col: activeCell.col})
+    };
     
     useEffect(() => {        
         dispatch({type: 'InitializeSheetData', data: [...Array(rowsCount)].map((_, i) => Array(colsCount).fill(''))});
@@ -140,7 +168,10 @@ const Sheets = ({rowsCount, colsCount}) => {
 
         if(!(cellRowIndex === 0 && cellColIndex === 0)){
             if(cellRowIndex === 0){
+                ContextMenuOptions.sortAZ.onSelect = colSortAZ;
                 newMenuList.push(ContextMenuOptions.sortAZ);
+                
+                ContextMenuOptions.sortZA.onSelect = colSortZA;
                 newMenuList.push(ContextMenuOptions.sortZA);
             } else{
                 ContextMenuOptions.rowAbove.onSelect = addRowAbove;
@@ -180,7 +211,7 @@ const Sheets = ({rowsCount, colsCount}) => {
                         if(rI === 0 && cI === 0){
                             cellProps = {headerCell: true, value: ''}
                         } else if(rI === 0){
-                            cellProps = {headerCell: true, enableSorting: true, value: getColumnName(cI)}
+                            cellProps = {headerCell: true, value: getColumnName(cI)}
                         } else if(cI === 0){
                             cellProps = {headerCell: true, value: rI}
                         } else{
